@@ -8,7 +8,14 @@ from db import users
 def user():
     return { 'users': list(users.values()) }, 200
 
-@app.post('/user', methods=["POST"])
+@app.get('/user/<user_id>')
+def get_user(user_id):
+   try:
+      return { 'user: users[user_id]'}
+   except:
+      return {'message': 'invalid user'}, 400
+
+@app.route('/user', methods=["POST"])
 def create_user():
     json_body = request.get_json()
     users[uuid4()] = json_body
