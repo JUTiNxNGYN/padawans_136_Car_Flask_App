@@ -5,7 +5,7 @@ from flask_smorest import abort
 
 from models.PostModel import PostModel
 from schemas import PostSchema
-from db import posts, users
+from db import cars, users
 from . import bp
 # post routes
 
