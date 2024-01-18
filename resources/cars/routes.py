@@ -1,46 +1,52 @@
+    
 from flask import request
 from uuid import uuid4
+from flask.views import MethodView
 
-from app import app
+from schemas import PostSchema
 from db import cars, users
+from . import bp
+# post routes
 
-@app.get('/cars')
-def carList():
-    return {'cars':cars}
+@bp.route('/<car_id>')
+class Post(MethodView):
 
-@app.get('/cars/<car_name>')
-def carSpec(car_name):
+  @bp.response(200, PostSchema)
+  def get(self, car_id):
     try:
-        return {f'{car_name}':cars[car_name]},200
+      return cars[car_id]
     except KeyError:
-        return {"message": "Invalid car"}, 400
+      return {'message': "Invalid Post"}, 400
 
+  @bp.arguments(PostSchema)
+  def put(self, car_data ,car_id):
+    try:
+      post = cars[car_id]
+      if car_data['user_id'] == cars['user_id']:
+        post['body'] = car_data['body']
+        return { 'message': 'Car Updated' }, 202
+      return {'message': "Unauthorized"}, 401
+    except:
+      return {'message': "Invalid Car Id"}, 400
 
-@app.post('/cars')
-def add_car():
-    car_data = request.get_json()   
+  def delete(self, car_id):
+    try:
+      del cars[car_id]
+      return {"message": "Car Deleted"}, 202
+    except:
+      return {'message':"Invalid Car"}, 400
+
+@bp.route('/')
+class PostList(MethodView):
+
+  @bp.response(200, PostSchema(many = True))
+  def get(self):
+    return  list(cars.values())
+  
+  @bp.arguments(PostSchema)
+  def post(self, car_data):
     user_id = car_data['user_id']
     if user_id in users:
-        cars[uuid4()]= car_data
-        return { 'message': "Car Created" }, 201
+      cars[uuid4()] = car_data
+      return { 'message': "Car Created" }, 201
     return { 'message': "Invalid User"}, 401
-
-@app.put('/car/<car_id>')
-def update_car(car_id):
-    try:
-        post = cars[car_id]
-        post_data = request.get_json()
-        if post_data['user_id']== post['user_id']:
-            post['body'] = post_data['body']
-            return {'message': 'Car Updated'}, 202
-        return {'message': "Unauthorized"}, 401
-    except:
-        return{'message': "Invalid Post"}, 400
-    
-@app.delete('/car/<car_id>')
-def delete_car(car_id):
-    try:
-        del cars[car_id]
-        return {"message": "Car Deleted"}, 202
-    except:
-        return {'message': "Invalid Car"}, 400
