@@ -13,8 +13,9 @@ api = Api(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
+
 from models.user_model import UserModel
-from models import PostModel
+from models import PostModel, UserModel
 
 from resources.users import bp as user_bp
 api.register_blueprint(user_bp)
