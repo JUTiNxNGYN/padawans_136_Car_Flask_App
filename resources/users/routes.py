@@ -1,21 +1,21 @@
 from flask import request
-from uuid import uuid4
+
 from flask.views import MethodView
 from flask_smorest import abort
 from . import bp
-from db import users
 
-from schemas import UserSchema
+from schemas import UserSchema, UserSchemaNested
 from models.user_model import UserModel
 # user routes
 
 @bp.route('/user/<user_id>')
 class User(MethodView):
 
-  @bp.response(200, UserSchema)
+  @bp.response(200, UserSchemaNested)
   def get(self,user_id):
     user = UserModel.query.get(user_id)
     if user:
+      print(user.posts.all())
       return user
     else:
       abort(400, message='User not found')
@@ -52,3 +52,16 @@ class UserList(MethodView):
       return { 'message' : f'{user_data["username"]} created' }, 201
     except:
       abort(400, message='Username and Email Already taken')
+      
+@bp.route('/user/follow/<followed_id>')
+class FollowUser(MethodView):
+
+  def post(followed_id):
+    follower = request.get_json()
+    user = UserModel.query.get(follower['id'])
+    if user:
+      user.followed.append(UserModel.query.get(followed_id))
+      user.commit()
+      return {'message':'user followed'}
+    else:
+      return {'message':'invalid user'}, 400

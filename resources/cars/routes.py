@@ -3,19 +3,20 @@ from uuid import uuid4
 from flask.views import MethodView
 from flask_smorest import abort
 
-from models.PostModel import PostModel
-from schemas import PostSchema
-from db import cars, users
+from models import PostModel
+from schemas import PostSchema, PostSchemaNested
+
 from . import bp
 # post routes
 
 @bp.route('/<car_id>')
 class Post(MethodView):
 
-  @bp.response(200, PostSchema)
+  @bp.response(200, PostSchemaNested)
   def get(self, car_id):
     post = PostModel.query.get(car_id)
     if post:
+      print(post.author)
       return post 
     abort(400, message='Invalid Car')
 
@@ -24,8 +25,10 @@ class Post(MethodView):
     post = PostModel.query.get(car_id)
     if post:
       post.body = car_data['body']
-      post.commit()
+      post.commit()   
+      return {'message': 'Car updated'}, 201
     return {'message': "Invalid Car Id"}, 400
+    
 
   def delete(self, car_id):
     post = PostModel.query.get(car_id)
