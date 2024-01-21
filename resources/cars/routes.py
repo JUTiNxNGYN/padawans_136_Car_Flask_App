@@ -1,4 +1,5 @@
 from flask import request
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from uuid import uuid4
 from flask.views import MethodView
 from flask_smorest import abort
@@ -20,6 +21,7 @@ class Post(MethodView):
       return post 
     abort(400, message='Invalid Car')
 
+  @jwt_required
   @bp.arguments(PostSchema)
   def put(self, car_data ,car_id):
     post = PostModel.query.get(car_id)
@@ -29,7 +31,7 @@ class Post(MethodView):
       return {'message': 'Car updated'}, 201
     return {'message': "Invalid Car Id"}, 400
     
-
+  @jwt_required
   def delete(self, car_id):
     post = PostModel.query.get(car_id)
     if post:
@@ -44,6 +46,7 @@ class PostList(MethodView):
   def get(self):
     return PostModel.query.all()
   
+  @jwt_required()
   @bp.arguments(PostSchema)
   def post(self, car_data):
     try:
