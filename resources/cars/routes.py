@@ -51,8 +51,12 @@ class PostList(MethodView):
   def post(self, car_data):
     try:
       post = PostModel()
-      post.user_id = car_data['user_id']
-      post.body = car_data['body']
+      post.user_id = get_jwt_identity()
+      post.Year = car_data['Year']
+      post.Make = car_data['Make']
+      post.Model = car_data['Model']
+      post.Trim = car_data['Trim']
+      post.Color = car_data['Color']
       post.commit()
       return { 'message': "Car Created" }, 201
     except:
